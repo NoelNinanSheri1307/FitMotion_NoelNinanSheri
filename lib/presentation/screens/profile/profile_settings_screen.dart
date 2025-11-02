@@ -86,17 +86,38 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen>
     await _profileBox.put('name', _nameController.text.trim());
     await _profileBox.put('email', _emailController.text.trim());
 
-    // Password handling
+    // Password handling with debug prints and cross-check between Hive & SharedPreferences
     if (_oldPassController.text.isNotEmpty &&
         _newPassController.text.isNotEmpty) {
-      final storedPass = _profileBox.get('password');
-      if (_oldPassController.text == storedPass) {
+      final storedPassHive = _profileBox.get('password'); // may be null
+      final prefs = await SharedPreferences.getInstance();
+      final storedPassPrefs = prefs.getString('password'); // may be null
+
+      // DEBUG prints — remove later (insecure)
+      // These prints will show in the debug console/logcat
+      print('DEBUG: storedPass (Hive)    = $storedPassHive');
+      print('DEBUG: storedPass (SharedPrefs) = $storedPassPrefs');
+      print('DEBUG: entered old password = ${_oldPassController.text}');
+
+      final entered = _oldPassController.text;
+
+      // Accept if entered matches Hive OR SharedPreferences
+      final bool matchesHive =
+          (storedPassHive != null && entered == storedPassHive);
+      final bool matchesPrefs =
+          (storedPassPrefs != null && entered == storedPassPrefs);
+
+      if (matchesHive || matchesPrefs) {
+        // Save new password to both storage locations so they stay in sync
         await _profileBox.put('password', _newPassController.text);
-        _wrongOldPassword = false;
+        await prefs.setString('password', _newPassController.text);
+
+        setState(() => _wrongOldPassword = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Password updated successfully!")),
         );
       } else {
+        // Wrong old password — shake + red styling + snackbar
         setState(() => _wrongOldPassword = true);
         _shakeController.forward(from: 0);
         ScaffoldMessenger.of(
@@ -106,7 +127,7 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen>
       }
     }
 
-    // Notifications
+    // Notifications: store preference + schedule/cancel
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notificationsEnabled', _notificationsEnabled);
 
@@ -190,6 +211,8 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen>
   Future<void> _logout() async {
     setState(() => _isLoggingOut = true);
 
+    // Play logout Lottie for its duration (we'll show the Lottie screen and route after)
+    // We'll delay here and then navigate — the UI shows the Lottie and waits
     await Future.delayed(const Duration(seconds: 3));
 
     if (mounted) {
@@ -216,10 +239,13 @@ class _ProfileSettingsScreenState extends ConsumerState<ProfileSettingsScreen>
         backgroundColor: Colors.black,
         body: Center(
           child: Lottie.asset(
-            'assets/lottie/logout.json',
+            'assets/animations/logout.json',
             repeat: false,
             onLoaded: (composition) {
-              Future.delayed(composition.duration, _logout);
+              // ensure lottie plays its full duration before navigation
+              Future.delayed(composition.duration, () {
+                if (mounted) _logout();
+              });
             },
           ),
         ),
