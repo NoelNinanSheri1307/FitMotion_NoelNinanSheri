@@ -249,14 +249,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         title: Text(
           "FitMotion Dashboard",
           style: GoogleFonts.satisfy(
-            textStyle: const TextStyle(
+            textStyle: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
-              color: Colors.blueAccent,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
             ),
           ),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor:
+            Theme.of(context).appBarTheme.backgroundColor ??
+            (Theme.of(context).brightness == Brightness.dark
+                ? Colors.black
+                : Colors.white),
         elevation: 3,
         actions: [
           IconButton(
@@ -330,9 +336,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                     _buildSectionCard(
                       icon: Icons.quiz,
-                      title: "Take Quiz",
+                      title: "Take Daily Quiz",
                       onTap: () =>
-                          _navigateWithSlide(context, const QuizScreen()),
+                          _navigateWithSlide(context, const DailyQuizScreen()),
                     ),
                     _buildSectionCard(
                       icon: Icons.lightbulb_outline,
