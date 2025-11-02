@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import 'core/theme/app_theme.dart';
-import 'core/routing/app_router.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
 import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'presentation/screens/auth/auth_screen.dart';
+import 'data/models/workout_model.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // ✅ Initialize Hive
+  await Hive.initFlutter();
+
+  // ✅ Register all model adapters
+  Hive.registerAdapter(WorkoutModelAdapter());
+
+  // ✅ Open the main box where workouts will be stored
+  await Hive.openBox<WorkoutModel>('workouts');
+
+  // ✅ Load SharedPreferences for onboarding
   final prefs = await SharedPreferences.getInstance();
   final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
 
+  // ✅ Launch app
   runApp(
     ProviderScope(child: FitMotionApp(hasSeenOnboarding: hasSeenOnboarding)),
   );

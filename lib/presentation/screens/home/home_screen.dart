@@ -357,7 +357,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     style: GoogleFonts.satisfy(
                       textStyle: const TextStyle(
                         fontSize: 18,
-                        color: Colors.black87,
+                        color: Color.fromARGB(221, 235, 243, 165),
                       ),
                     ),
                     textAlign: TextAlign.center,
