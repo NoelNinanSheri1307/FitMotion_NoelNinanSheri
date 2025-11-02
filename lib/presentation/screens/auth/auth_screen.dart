@@ -2,28 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-// Dummy dashboard to demonstrate navigation
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Dashboard"),
-        backgroundColor: Colors.blueAccent,
-        centerTitle: true,
-      ),
-      body: const Center(
-        child: Text(
-          "Welcome to FitMotion Dashboard!",
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
-    );
-  }
-}
+import '../home/home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -75,13 +54,11 @@ class _AuthScreenState extends State<AuthScreen>
 
     bool hasError = false;
 
-    // Validate email
     if (!email.contains('@')) {
       _emailError = 'Enter a valid email address';
       hasError = true;
     }
 
-    // Validate password
     if (password.length < 8) {
       _passwordError = 'Password must be at least 8 characters';
       hasError = true;
@@ -131,16 +108,35 @@ class _AuthScreenState extends State<AuthScreen>
       await prefs.setBool('isLoggedIn', true);
       setState(() => _isLoggingIn = true);
 
-      // Play login animation
-      await Future.delayed(const Duration(seconds: 2));
+      // Wait for the login animation to finish before navigation
+      await Future.delayed(const Duration(seconds: 3));
 
       if (!mounted) return;
       setState(() => _isLoggingIn = false);
 
-      // Navigate to Dashboard
+      // Smooth fade transition to HomeScreen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const HomeScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = 0.0;
+            const end = 1.0;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(
+              begin: begin,
+              end: end,
+            ).chain(CurveTween(curve: curve));
+
+            return FadeTransition(
+              opacity: animation.drive(tween),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 800),
+        ),
       );
     } else {
       setState(() => _isInvalid = true);
@@ -157,7 +153,6 @@ class _AuthScreenState extends State<AuthScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Registration animation
     if (_isRegistering) {
       return Scaffold(
         body: Center(
@@ -169,7 +164,6 @@ class _AuthScreenState extends State<AuthScreen>
       );
     }
 
-    // Invalid login animation
     if (_isInvalid) {
       return Scaffold(
         body: Center(
@@ -178,16 +172,20 @@ class _AuthScreenState extends State<AuthScreen>
       );
     }
 
-    // Successful login animation
     if (_isLoggingIn) {
       return Scaffold(
         body: Center(
-          child: Lottie.asset('assets/animations/login.json', repeat: false),
+          child: Lottie.asset(
+            'assets/animations/login.json',
+            repeat: false,
+            onLoaded: (composition) {
+              debugPrint('Login animation duration: ${composition.duration}');
+            },
+          ),
         ),
       );
     }
 
-    // Main Auth UI
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 1, 1, 1),
@@ -237,7 +235,6 @@ class _AuthScreenState extends State<AuthScreen>
                     ),
                   if (!_isLoginMode) const SizedBox(height: 16),
 
-                  // Email
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -271,10 +268,8 @@ class _AuthScreenState extends State<AuthScreen>
                         ),
                       ),
                     ),
-
                   const SizedBox(height: 16),
 
-                  // Password
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
@@ -311,7 +306,6 @@ class _AuthScreenState extends State<AuthScreen>
                         ),
                       ),
                     ),
-
                   const SizedBox(height: 24),
 
                   ElevatedButton(
