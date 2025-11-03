@@ -104,6 +104,18 @@ Reduced rebuilds through isolated providers.
 
 Performance profiling via Flutter DevTools (FPS, memory, rebuild counts).
 
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+![alt text](image-3.png)
+
+![alt text](image-4.png)
+
+![alt text](image-5.png)
+
 Testing
 
 Widget tests for animation triggers and Riverpod state updates.

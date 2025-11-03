@@ -43,7 +43,7 @@ flutter {
 }
 
 dependencies {
-    // ✅ Required to fix your desugaring build issue
+
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     // Optional, but ensures Kotlin 11 compatibility
