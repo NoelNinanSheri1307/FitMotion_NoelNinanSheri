@@ -50,6 +50,7 @@ dependencies:
   share_plus: ^10.0.2
   flutter_local_notifications: ^17.1.2
   timezone: ^0.9.4
+  vector_math: ^2.2.0
 
 dev_dependencies:
   hive_generator: ^2.0.1
